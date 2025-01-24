@@ -3,30 +3,35 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 
-urls = {
+url_base = {
     '品川区': 'https://www.baitoru.com/kanto/jlist/tokyo/23ku/shinagawaku/food/',
-    '宮崎市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/miyazakishi/food/',
+    '宮崎市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/miyazakishi/food/'
+}
+
+pages = {
+    '品川区': 50,
+    '宮崎市': 38
 }
 
 data = []
 
-for city, url in urls.items():
-    print(f"Scraping {city}...")
+def scrape_page(city, url, page):
+    print(f"Scraping {city}, Page {page}...")
 
-    time.sleep(5)  
+    time.sleep(5)  # リクエスト間隔を空ける
 
     response = requests.get(url)
     if response.status_code != 200:
-        print(f"Failed to retrieve data for {city}")
-        continue
+        print(f"Failed to retrieve data for {city}, Page {page}")
+        return
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
     job_listings = soup.find_all('div', class_='bg02')
 
     if not job_listings:
-        print(f"No job listings found for {city}")
-        continue
+        print(f"No job listings found for {city}, Page {page}")
+        return
 
     for job in job_listings:
         # 初期化
@@ -39,14 +44,9 @@ for city, url in urls.items():
             job_stores = job.find('div', class_="pt02b").find('p').text.strip()
         except AttributeError:
             pass
-        
+
         try:
             job_title = job.find('div', class_="pt02b").find('span').text.strip()
-        except AttributeError:
-            pass
-        
-        try:
-            job_title = job.find('div', class_="pt02").find('ul', class_="ul01").find('li', class_="li01").find('span').text.strip()
         except AttributeError:
             pass
 
@@ -68,6 +68,16 @@ for city, url in urls.items():
             '勤務地': job_location, 
             '時給': job_wage
         })
+
+for city, base_url in url_base.items():
+    for page in range(1, pages[city] + 1):
+        # ページURLの設定
+        if page == 1:
+            url = base_url
+        else:
+            url = base_url + f'page{page}/'
+        
+        scrape_page(city, url, page)
     
     print(f"Completed {city}")
 
