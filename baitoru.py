@@ -4,8 +4,8 @@ import time
 import pandas as pd
 
 urls = {
-    '品川区': 'https://www.baitoru.com/kanto/jlist/tokyo/23ku/shinagawaku/btp1/',
-    '宮崎市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/miyazakishi/btp1/',
+    '品川区': 'https://www.baitoru.com/kanto/jlist/tokyo/23ku/shinagawaku/food/',
+    '宮崎市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/miyazakishi/food/',
 }
 
 data = []
