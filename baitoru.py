@@ -12,37 +12,42 @@ data = []
 
 for city, url in urls.items():
     print(f"Scraping {city}...")
-    time.sleep(5)
-    
+
+    time.sleep(5)  
+
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Failed to retrieve data for {city}")
         continue
 
     soup = BeautifulSoup(response.text, 'html.parser')
-    
-    job_listings = soup.find_all('div', class_='job-data')
+
+    job_listings = soup.find_all('div', class_='pt02b')
+
     if not job_listings:
         print(f"No job listings found for {city}")
-    
+        continue
+
     for job in job_listings:
         try:
-            job_title = job.find('h2', class_='job-title').text.strip()
+            job_title = job.find('p').text.strip()
         except AttributeError:
             job_title = None
+
         try:
-            job_location = job.find('div', class_='job-location').text.strip()
+            job_location = job.find('ul', class_='ul02').find('li').text.strip().replace('[勤務地]', '').replace('\xa0', ' ').split(';')[1].strip()
         except AttributeError:
             job_location = None
+
         try:
-            job_wage = job.find('div', class_='job-wage').text.strip()
+            job_wage = job.find('div').find('em').text.strip()  # 実際のクラス名に合わせて修正が必要です
         except AttributeError:
             job_wage = None
-        
+
         data.append({
             '場所': city, 
             '仕事名': job_title, 
-            '場所詳細': job_location, 
+            '勤務地': job_location, 
             '時給': job_wage
         })
     
@@ -56,7 +61,6 @@ else:
     print("No data was scraped.")
 
 with open('jobs_data.sql', 'w', encoding='utf-8-sig') as f:
-
     f.write('CREATE TABLE job_listings (\n')
     f.write('    id SERIAL PRIMARY KEY,\n')
     f.write('    city VARCHAR(50),\n')
@@ -68,11 +72,11 @@ with open('jobs_data.sql', 'w', encoding='utf-8-sig') as f:
     f.write('INSERT INTO job_listings (city, job_title, job_location, job_wage) VALUES\n')
     
     for i, row in enumerate(data):
-        values = f"('{row['場所']}', '{row['仕事名']}', '{row['場所詳細']}', '{row['時給']}')"
+        values = f"('{row['場所']}', '{row['仕事名']}', '{row['勤務地']}', '{row['時給']}')"
         if i != len(data) - 1:
             values += ',\n'
         else:
             values += ';\n'
         f.write(values)
 
-    print("DDL file created successfully as jobs_data.sql")
+print("DDL file created successfully as jobs_data.sql")
