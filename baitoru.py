@@ -22,27 +22,33 @@ for store, url in urls.items():
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    job_listings = soup.find('div', class_='pt02b').find('p')
+    job_listings = soup.find_all('div', class_='pt02b')
 
     if not job_listings:
         print(f"No job listings found for {store}")
         continue
 
     for job in job_listings:
-        try:
-            job_title = job.find('div',class_="pt02").find('ul',class_="ul01").find('li',class_="li01").find('span',).text.strip()
-        except AttributeError:
-            job_title = None
+        # 初期化
+        job_title = None
+        job_location = None
+        job_wage = None
 
         try:
-            job_location = job.find('ul', class_='ul02').find_all('li').text.strip()
+            job_title = job.find('div', class_="pt02").find('ul', class_="ul01").find('li', class_="li01").find('span').text.strip()
         except AttributeError:
-            job_location = None
+            pass
 
         try:
-            job_wage = job.find('div',class_='pt03').find('em').text.strip()  
+            job_location_list = job.find('ul', class_='ul02').find_all('li')
+            job_location = ' '.join([li.text.strip() for li in job_location_list])
         except AttributeError:
-            job_wage = None
+            pass
+
+        try:
+            job_wage = job.find('div', class_='pt03').find('em').text.strip()
+        except AttributeError:
+            pass
 
         data.append({
             '場所': store, 
