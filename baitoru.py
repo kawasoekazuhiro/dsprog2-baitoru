@@ -5,11 +5,7 @@ import pandas as pd
 
 urls = {
     '品川区': 'https://www.baitoru.com/kanto/jlist/tokyo/23ku/shinagawaku/btp1/',
-    '目黒区': 'https://www.baitoru.com/kanto/jlist/tokyo/23ku/meguroku/btp1/',
-    '大田区': 'https://www.baitoru.com/kanto/jlist/tokyo/23ku/ootaku/btp1/',
     '宮崎市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/miyazakishi/btp1/',
-    '都城市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/miyakonojo/btp1/',
-    '延岡市': 'https://www.baitoru.com/kyushu/jlist/miyazaki/nobeoka/btp1/'
 }
 
 data = []
