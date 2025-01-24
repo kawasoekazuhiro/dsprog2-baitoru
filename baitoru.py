@@ -36,7 +36,12 @@ for city, url in urls.items():
         job_wage = None
 
         try:
-            job_title = job.find('div', class_="pt02b").find('p').text.strip()
+            job_stores = job.find('div', class_="pt02b").find('p').text.strip()
+        except AttributeError:
+            pass
+        
+        try:
+            job_title = job.find('div', class_="pt02b").find('span').text.strip()
         except AttributeError:
             pass
         
