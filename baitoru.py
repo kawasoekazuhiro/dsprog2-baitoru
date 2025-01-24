@@ -10,30 +10,36 @@ urls = {
 
 data = []
 
-for store, url in urls.items():
-    print(f"Scraping {store}...")
+for city, url in urls.items():
+    print(f"Scraping {city}...")
 
     time.sleep(5)  
 
     response = requests.get(url)
     if response.status_code != 200:
-        print(f"Failed to retrieve data for {store}")
+        print(f"Failed to retrieve data for {city}")
         continue
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    job_listings = soup.find_all('div', class_='pt02b')
+    job_listings = soup.find_all('div', class_='bg02')
 
     if not job_listings:
-        print(f"No job listings found for {store}")
+        print(f"No job listings found for {city}")
         continue
 
     for job in job_listings:
         # 初期化
+        job_stores = None
         job_title = None
         job_location = None
         job_wage = None
 
+        try:
+            job_title = job.find('div', class_="pt02b").find('p').text.strip()
+        except AttributeError:
+            pass
+        
         try:
             job_title = job.find('div', class_="pt02").find('ul', class_="ul01").find('li', class_="li01").find('span').text.strip()
         except AttributeError:
@@ -51,13 +57,14 @@ for store, url in urls.items():
             pass
 
         data.append({
-            '場所': store, 
+            '都市名': city, 
+            '店舗名': job_stores,
             '仕事名': job_title, 
             '勤務地': job_location, 
             '時給': job_wage
         })
     
-    print(f"Completed {store}")
+    print(f"Completed {city}")
 
 if data:
     df = pd.DataFrame(data)
@@ -70,15 +77,16 @@ with open('jobs_data.sql', 'w', encoding='utf-8-sig') as f:
     f.write('CREATE TABLE job_listings (\n')
     f.write('    id SERIAL PRIMARY KEY,\n')
     f.write('    city VARCHAR(50),\n')
+    f.write('    job_stores VARCHAR(255),\n')
     f.write('    job_title VARCHAR(255),\n')
     f.write('    job_location VARCHAR(255),\n')
     f.write('    job_wage VARCHAR(50)\n')
     f.write(');\n\n')
 
-    f.write('INSERT INTO job_listings (city, job_title, job_location, job_wage) VALUES\n')
+    f.write('INSERT INTO job_listings (city, job_stores, job_title, job_location, job_wage) VALUES\n')
     
     for i, row in enumerate(data):
-        values = f"('{row['場所']}', '{row['仕事名']}', '{row['勤務地']}', '{row['時給']}')"
+        values = f"('{row['場所']}', '{row['店舗名']}', '{row['仕事名']}', '{row['勤務地']}', '{row['時給']}')"
         if i != len(data) - 1:
             values += ',\n'
         else:
