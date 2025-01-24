@@ -10,48 +10,48 @@ urls = {
 
 data = []
 
-for city, url in urls.items():
-    print(f"Scraping {city}...")
+for store, url in urls.items():
+    print(f"Scraping {store}...")
 
     time.sleep(5)  
 
     response = requests.get(url)
     if response.status_code != 200:
-        print(f"Failed to retrieve data for {city}")
+        print(f"Failed to retrieve data for {store}")
         continue
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    job_listings = soup.find_all('div', class_='pt02b')
+    job_listings = soup.find('div', class_='pt02b').find('p')
 
     if not job_listings:
-        print(f"No job listings found for {city}")
+        print(f"No job listings found for {store}")
         continue
 
     for job in job_listings:
         try:
-            job_title = job.find('p').text.strip()
+            job_title = job.find('div',class_="pt02").find('ul',class_="ul01").find('li',class_="li01").find('span',).text.strip()
         except AttributeError:
             job_title = None
 
         try:
-            job_location = job.find('ul', class_='ul02').find('li').text.strip().replace('[勤務地]', '').replace('\xa0', ' ').split(';')[1].strip()
+            job_location = job.find('ul', class_='ul02').find_all('li').text.strip()
         except AttributeError:
             job_location = None
 
         try:
-            job_wage = job.find('div').find('em').text.strip()  # 実際のクラス名に合わせて修正が必要です
+            job_wage = job.find('div',class_='pt03').find('em').text.strip()  
         except AttributeError:
             job_wage = None
 
         data.append({
-            '場所': city, 
+            '場所': store, 
             '仕事名': job_title, 
             '勤務地': job_location, 
             '時給': job_wage
         })
     
-    print(f"Completed {city}")
+    print(f"Completed {store}")
 
 if data:
     df = pd.DataFrame(data)
