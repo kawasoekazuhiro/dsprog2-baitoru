@@ -46,7 +46,7 @@ for city, url in urls.items():
             pass
 
         try:
-            job_location_list = job.find('ul', class_='ul02').find_all('li')
+            job_location_list = job.find('div', class_='pt02b').find('ul', class_='ul02').find_all('li')
             job_location = ' '.join([li.text.strip() for li in job_location_list])
         except AttributeError:
             pass
@@ -86,7 +86,7 @@ with open('jobs_data.sql', 'w', encoding='utf-8-sig') as f:
     f.write('INSERT INTO job_listings (city, job_stores, job_title, job_location, job_wage) VALUES\n')
     
     for i, row in enumerate(data):
-        values = f"('{row['場所']}', '{row['店舗名']}', '{row['仕事名']}', '{row['勤務地']}', '{row['時給']}')"
+        values = f"('{row['都市名']}', '{row['店舗名']}', '{row['仕事名']}', '{row['勤務地']}', '{row['時給']}')"
         if i != len(data) - 1:
             values += ',\n'
         else:
